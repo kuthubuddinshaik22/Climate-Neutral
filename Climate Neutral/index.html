@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Change Climate</title>
+
+    <link rel="stylesheet" href="style.css" />
+
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyDuiT5T0IiM8jmwbkIwVKVtItw36fyGchw",
+        authDomain: "climate-neutral-2010.firebaseapp.com",
+        projectId: "climate-neutral-2010",
+        storageBucket: "climate-neutral-2010.appspot.com",
+        messagingSenderId: "547834714174",
+        appId: "1:547834714174:web:323b1e753cdea4c0cf196f",
+      };
+
+      // Initialize Firebase
+      const app = initializeApp(firebaseConfig);
+    </script>
+
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+  </head>
+  <body>
+    <nav class="primary-nav">
+      <img class ="banner-img" src="https://assets-global.website-files.com/5f0c587ab32ca0ef2d078a87/653abc7f5bf4021c85246d08_ChangeClimateProject-Logo-Horizontal-Short-Blk-1920-p-500.png" alt="Climate Neutral" />
+      <a href="/login.html" id="loginBtn" class="btn btn--ghost">Login</a>
+      <button id="logoutBtn" class="btn btn--ghost hidden">Logout</button>
+    </nav>
+
+    <main>
+      <header>
+        <h1>Change Climate</h1>
+        <div class="buttons">
+          <button class="btn" id="addCategoriesBtn">
+            Add Categories / Scenarios
+          </button>
+          <button class="btn hidden" id="addValuesBtn">Add Scores</button>
+          <button class="btn" id="upload">Import Scores</button>
+          <button class="btn" id="loadFromLS">
+            Recover Saved Scores
+          </button>
+          <input type="file" id="fileInput" style="display:none;">
+          <button class="btn" id="saveToLS">Save Scores</button>
+        </div>
+      </header>
+
+      <dialog id="modalDialog">
+        <button class="btn btn--ghost" id="closeModalBtn">&Cross;</button>
+
+        <div class="stepper">
+          <div class="step">
+            <span class="step-number">1</span>
+            <span class="step-label">Add Categories</span>
+
+            <div id="categoriesModal">
+              <form id="categoriesForm">
+                <div class="footer">
+                  <button
+                    type="button"
+                    class="btn btn--ghost"
+                    id="addNewCategoryBtn"
+                  >
+                    + Add New Cateogry
+                  </button>
+                  <span class="spacer"></span>
+
+                  <button class="btn btn--secondary" id="saveCategoriesBtn">
+                    Save Categories
+                  </button>
+                  <button class="btn" type="button" id="addScenariosBtn">
+                    Add Scenarios &rarr;
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+          <div class="step">
+            <span class="step-number">2</span>
+            <span class="step-label">Add Scenarios</span>
+
+            <div id="scenariosModal">
+              <form id="scenariosForm">
+                <div class="footer">
+                  <button
+                    type="button"
+                    class="btn btn--ghost"
+                    id="addNewScenarioBtn"
+                  >
+                    + Add New Scenario
+                  </button>
+                  <span class="spacer"></span>
+                  <button
+                    type="button"
+                    class="btn btn--ghost"
+                    id="editCategoriesBtn"
+                  >
+                    &larr; Edit Categories
+                  </button>
+                  <button class="btn" id="saveScenariosBtn">
+                    Save Scenarios
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </dialog>
+
+      <button class="btn hidden" id="export">Export Scores</button>
+
+      <div class="tableContainer hidden">
+        <form id="valuesForm" method="post">
+          <table id="valuesTable"></table>
+          <button class="btn" id="calcScoreBtn">Calculate Score</button>
+        </form>
+      </div>
+      <h2 class =" recommended"></h2>
+
+      <div class="plotContainer hidden">
+        <div class="form-input">
+          <div class="graph-select">
+            <select id="plotType" required>
+              <option value="bar">Bar Graph</option>
+              <option value="pie">Pie Chart</option>
+            </select>
+          </div>
+        </div>
+        <div id="valuePlot"></div>
+      </div>
+    </main>
+
+    <template id="singleCategory">
+      <fieldset class="category-inputs">
+        <legend>Category</legend>
+        <button
+          type="button"
+          class="btn btn--ghost delete-btn"
+          id="deleteCategoryBtn"
+        >
+          <img src="img/delete.svg" alt="Delete Category" />
+        </button>
+        <div class="form-input">
+          <label for="categoryName">Category Name</label>
+          <input
+            type="text"
+            name="categoryName"
+            id="categoryName"
+            placeholder="Cateogry Name"
+            required
+            autofocus
+          />
+        </div>
+        <div class="form-input">
+          <label for="scoringType">Scoring Type</label>
+          <div class="select">
+            <select name="scoringType" id="scoringType" required>
+              <option value="">Select scoring type</option>
+              <option value="numeric">Numeric</option>
+              <option value="descriptive">Descriptive</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-input">
+          <label for="weight">Weight</label>
+          <input
+            type="number"
+            name="weight"
+            id="weight"
+            placeholder="Weight (0-1)"
+            min="0"
+            max="1"
+            step="0.1"
+            required
+          />
+        </div>
+        <div class="form-input">
+          <label for="optimizationDir">Direction of Optimization</label>
+          <div class="select">
+            <select name="optimizationDir" id="optimizationDir" required>
+              <option value="up">Up</option>
+              <option value="down">Down</option>
+            </select>
+          </div>
+        </div>
+      </fieldset>
+    </template>
+
+    <template id="singleScenario">
+      <fieldset class="scenario-inputs">
+        <legend>Scenario</legend>
+        <button
+          type="button"
+          class="btn btn--ghost delete-btn"
+          id="deleteScenarioBtn"
+        >
+          <img src="img/delete.svg" alt="Delete Category" />
+        </button>
+        <div class="form-input">
+          <label for="scenarioName">Scenario Name</label>
+          <input
+            type="text"
+            name="scenarioName"
+            id="scenarioName"
+            placeholder="Scenario Name"
+            required
+            autofocus
+          />
+        </div>
+      </fieldset>
+    </template>
+
+    <template id="descriptiveInput">
+      <div class="select">
+        <select>
+          <option value="1">Low</option>
+          <option value="2">Mid Low</option>
+          <option value="3">Mid</option>
+          <option value="4">Mid High</option>
+          <option value="5">High</option>
+        </select>
+      </div>
+    </template>
+    <script type="module" src="script.js"></script>
+  </body>
+</html>
